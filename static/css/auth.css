@@ -1,0 +1,109 @@
+/* Контейнер страницы с отступом от шапки */
+#password-page {
+    display: block !important;
+    width: 100% !important;
+    min-height: 80vh;
+    padding-top: 100px !important; /* Чтобы не пряталось под хедером */
+    background-color: #f8f9fa;
+}
+
+.password-container {
+    max-width: 460px !important;
+    margin: 0 auto !important;
+    padding: 0 20px;
+}
+
+/* Заголовок и стрелка */
+.password-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 16px !important;
+    margin-bottom: 24px !important;
+}
+
+.password-title {
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    margin: 0 !important;
+    color: #000 !important;
+}
+
+.password-back-link {
+    color: #000 !important;
+    text-decoration: none !important;
+    display: flex;
+    align-items: center;
+}
+
+/* Карточка */
+.password-card {
+    background: #ffffff !important;
+    border-radius: 16px !important;
+    padding: 35px !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08) !important;
+    display: block !important;
+}
+
+/* Поля формы */
+.password-group {
+    margin-bottom: 20px !important;
+    display: flex !important;
+    flex-direction: column !important; /* Чтобы метка была над полем */
+}
+
+.password-group label {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+    margin-bottom: 8px !important;
+    text-align: left !important;
+}
+
+.password-group input {
+    width: 100% !important;
+    height: 48px !important;
+    padding: 0 16px !important;
+    background: #f4f4f9 !important;
+    border: 1px solid #eee !important;
+    border-radius: 8px !important;
+    font-size: 15px !important;
+    box-sizing: border-box !important;
+}
+
+/* Кнопки */
+.password-actions {
+    display: flex !important;
+    justify-content: flex-end !important;
+    gap: 12px !important;
+    margin-top: 30px !important;
+}
+
+.password-btn-cancel {
+    background: #f1f1f5 !important;
+    color: #333 !important;
+    text-decoration: none !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    display: flex;
+    align-items: center;
+}
+
+.password-btn-submit {
+    background: #000 !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+}
+
+/* Ошибки */
+.password-error {
+    color: #d93025 !important;
+    font-size: 12px !important;
+    margin-top: 5px !important;
+}

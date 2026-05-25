@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Редактирование профиля{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<style>
+    .edit-container {
+        max-width: 600px;
+        margin: 60px auto;
+        padding: 30px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .edit-title { font-size: 22px; font-weight: 700; margin-bottom: 30px; color: #000; }
+    
+    .avatar-wrapper { text-align: center; margin-bottom: 30px; }
+    .avatar-wrapper img { 
+        width: 120px; 
+        height: 120px; 
+        border-radius: 50%; 
+        object-fit: cover;
+        border: 2px solid #f0f0f0;
+    }
+    
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #333; }
+    
+    .input-field { 
+        width: 100%; 
+        padding: 12px; 
+        border: 1px solid transparent; 
+        border-radius: 8px; 
+        background: #f5f5f9; 
+        box-sizing: border-box; 
+        font-size: 14px;
+        outline: none;
+        transition: border 0.2s;
+    }
+    .input-field:focus { border: 1px solid #ddd; }
+
+    .skills-form-block { 
+        margin-top: 20px; 
+        padding: 20px; 
+        background: #fafafa; 
+        border-radius: 10px; 
+        border: 1px solid #f0f0f0;
+    }
+    .skills-form-block ul { 
+        list-style: none; 
+        padding: 0; 
+        margin: 0; 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+        gap: 12px; 
+    }
+    .skills-form-block li { display: flex; align-items: center; font-size: 14px; }
+    .skills-form-block input[type="checkbox"] { 
+        margin-right: 10px; 
+        width: 18px; 
+        height: 18px; 
+        accent-color: #000; 
+        cursor: pointer;
+    }
+    
+    .form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 35px; }
+    .btn-cancel { 
+        background: #f0f0f5; 
+        color: #333; 
+        padding: 12px 24px; 
+        border-radius: 8px; 
+        text-decoration: none; 
+        font-size: 14px; 
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+    .btn-cancel:hover { background: #e8e8ed; }
+    .btn-save { 
+        background: #000; 
+        color: #fff; 
+        padding: 12px 24px; 
+        border-radius: 8px; 
+        border: none; 
+        font-size: 14px; 
+        font-weight: 600; 
+        cursor: pointer; 
+        transition: opacity 0.2s;
+    }
+    .btn-save:hover { opacity: 0.8; }
+
+    .error-list { color: #d93025; font-size: 12px; margin-top: 5px; list-style: none; padding: 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+    <h2 class="edit-title">Редактирование профиля</h2>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        {% if form.non_field_errors %}
+            <div style="background: #fdecea; color: #d93025; padding: 10px; border-radius: 6px; margin-bottom: 20px;">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+        
+        <div class="avatar-wrapper">
+            <img src="{% if user.avatar %}{{ user.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" alt="Аватар">
+        </div>
+        
+        {% for field in form %}
+            <div class="form-group {% if field.name == 'skills' %}skills-form-block{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                
+                {% if field.errors %}
+                    <ul class="error-list">
+                        {% for error in field.errors %}<li>{{ error }}</li>{% endfor %}
+                    </ul>
+                {% endif %}
+
+                {% if field.name == 'avatar' %}
+                    <div style="font-size: 13px; color: #666;">
+                        {{ field }}
+                    </div>
+                {% else %}
+                    {{ field }}
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        <div class="form-actions">
+            <a href="{% url 'users:profile_with_pk' pk=request.user.id %}" class="btn-cancel">Отмена</a>
+            <button type="submit" class="btn-save">Сохранить изменения</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Профиль {{ profile.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/project_list.css' %}">
+<link rel="stylesheet" href="{% static 'css/profile.css' %}">
+<link rel="stylesheet" href="{% static 'css/skills.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-info">
+            <img src="{% if profile.avatar %}{{ profile.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" alt="Аватар" class="profile-avatar">
+            <div class="profile-details">
+                <h2 class="profile-name">{{ profile.name }} {{ profile.surname }}</h2>
+                <p class="profile-description">
+                    {{ profile.about|default:"Описание профиля пока не добавлено." }}
+                </p>
+                
+                <div class="user-skills-display" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px;">
+                    {% for skill in profile.skills.all %}
+                        <span class="skill-tag" style="background: #eee; padding: 4px 12px; border-radius: 20px; font-size: 13px;">{{ skill.name }}</span>
+                    {% empty %}
+                        <span style="color: #999; font-size: 13px;">Навыки не указаны (добавьте их в настройках профиля)</span>
+                    {% endfor %}
+                </div>
+
+                <div class="profile-contacts" style="margin-top: 15px; color: #666;">
+                    <span>📧 {{ profile.email }}</span>
+                    {% if profile.phone %}<span> | 📞 {{ profile.phone }}</span>{% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="profile-actions">
+            <button class="black-button" onclick="copyProfileLink()">
+                {% include 'includes/svg/share.html' %}
+            </button>
+            {% if request.user.id == profile.id %}
+            <a href="{% url 'users:edit_profile' %}" class="black-button">
+                {% include 'includes/svg/pen.html' %} Редактировать
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <h3 style="margin: 40px 0 20px;">Проекты ({{ user_projects|length }})</h3>
+
+    <div class="collapsed-project-grid">
+        {% for project in user_projects %}
+        <div class="collapsed-project-card">
+            <div class="collapsed-project-card-header">
+                <h4><a href="{% url 'projects:detail' pk=project.id %}">{{ project.name }}</a></h4>
+                <span class="project-status-black">{{ project.get_status_display }}</span>
+            </div>
+            <div class="collapsed-project-card-body">
+                <p>{{ project.description|truncatechars:120 }}</p>
+                <div class="collapsed-project-card-footer">
+                    <p class="project-date">{{ project.created_at|date:"d.m.Y" }}</p>
+                    <div class="project-participants">
+                        {% include 'includes/svg/participants.html' %}
+                        {{ project.participants.count }} участников
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>У пользователя пока нет проектов.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function copyProfileLink() {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Ссылка скопирована!");
+}
+</script>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ project.name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/project_details.css' %}">
+<link rel="stylesheet" href="{% static 'css/skills.css' %}">
+<style>
+    .fix-title-participants {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 4px !important;
+        margin-bottom: 20px !important;
+    }
+    .fix-title-participants span { display: inline-block !important; }
+
+    .fav-icon { transition: all 0.2s ease; }
+    .is-favorite .fav-icon { fill: #ff4b4b !important; stroke: #ff4b4b !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="project-container">
+    <div class="project-card">
+        <div class="project-card-header">
+            <div class="project-card-header-left">
+                <img src="{% if project.owner.avatar %}{{ project.owner.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" class="project-author-avatar">
+                <div class="project-meta">
+                    <span class="project-author">{{ project.owner.name }} {{ project.owner.surname }}</span>
+                    <span class="project-date">{{ project.created_at|date:"d.m.Y" }}</span>
+                </div>
+            </div>
+            <div class="project-card-header-right" style="display: flex; align-items: center; gap: 15px;">
+                <button id="fav-btn" class="{% if request.user in project.favorited_by.all %}is-favorite{% endif %}" style="background: none; border: none; cursor: pointer; padding: 0; outline: none; display: flex;">
+                    <svg class="fav-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.78-8.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </button>
+                <span id="status-badge" class="project-status-black">{{ project.get_status_display }}</span>
+            </div>
+        </div>
+
+        <div class="project-card-body">
+            <h2 class="project-title">{{ project.name }}</h2>
+            <p class="project-description">{{ project.description }}</p>
+        </div>
+
+        <div class="project-actions">
+            <button class="black-button" onclick="copyURL()">
+                {% include 'includes/svg/share.html' %}
+            </button>
+            {% if request.user == project.owner %}
+                <a href="{% url 'projects:edit' pk=project.id %}" class="black-button">
+                    {% include 'includes/svg/pen.html' %} Редактировать
+                </a>
+                <button class="black-button" id="complete-btn" {% if project.status == 'closed' %}style="display:none"{% endif %}>
+                    Завершить проект
+                </button>
+            {% else %}
+                <form action="{% url 'projects:join' pk=project.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="black-button">
+                        {% if request.user in project.participants.all %}Покинуть проект{% else %}Участвовать{% endif %}
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="project-skills" style="margin-top: 30px;">
+        <h3>Необходимые навыки</h3>
+        <div id="skills-box" class="skills-container" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+            {% for skill in project.skills.all %}
+                <span class="skill-chip-fixed">
+                    {{ skill.name }}
+                    {% if request.user == project.owner %}
+                        <span class="remove-skill-ajax" onclick="removeSkill({{ skill.id }}, this)">&times;</span>
+                    {% endif %}
+                </span>
+            {% endfor %}
+            {% if request.user == project.owner %}
+                <input type="text" id="skill-input" placeholder="+ Добавить (Enter)" style="border: 1px dashed #ccc; padding: 4px 10px; border-radius: 6px; outline: none; font-size: 14px;">
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="project-participants-card" style="margin-top: 30px; padding: 20px; background: #fff; border-radius: 12px; border: 1px solid #eee;">
+        <h3 class="fix-title-participants">Участники (<span>{{ project.participants.count }}</span>)</h3>
+        
+        <div id="participants-list" style="display: flex; flex-wrap: wrap; gap: 15px;">
+            {% for member in project.participants.all %}
+            <a href="{% url 'users:profile_with_pk' pk=member.id %}" style="text-decoration: none; color: inherit;">
+                <div class="participant-item" style="display: flex; align-items: center; gap: 10px; background: #f9f9fb; padding: 8px 15px; border-radius: 10px; border: 1px solid #f0f0f0;">
+                    <img src="{% if member.avatar %}{{ member.avatar.url }}{% else %}{% static 'images/default-avatar.png' %}{% endif %}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                    <div class="participant-info">
+                        <span class="participant-name" style="font-size: 14px; font-weight: 600;">{{ member.name }} {{ member.surname }}</span>
+                    </div>
+                </div>
+            </a>
+            {% empty %}
+            <p style="color: gray;">Участников пока нет</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('fav-btn').addEventListener('click', function() {
+    fetch("{% url 'projects:toggle_favorite' pk=project.id %}", {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'}
+    })
+    .then(res => res.json())
+    .then(data => {
+        this.classList.toggle('is-favorite', data.is_favorite);
+    });
+});
+
+document.getElementById('complete-btn')?.addEventListener('click', function() {
+    fetch("{% url 'projects:toggle_status' pk=project.id %}", {
+        method: 'POST',
+        headers: {'X-CSRFToken': '{{ csrf_token }}'}
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.status === 'ok') {
+            document.getElementById('status-badge').innerText = data.new_status;
+            this.style.display = 'none';
+        }
+    })
+    .catch(err => alert("Ошибка сети. Проверьте консоль."));
+});
+
+document.getElementById('skill-input')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter' && this.value.trim() !== '') {
+        const formData = new FormData();
+        formData.append('name', this.value.trim());
+        formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+        fetch("{% url 'projects:add_skill' pk=project.id %}", { method: 'POST', body: formData })
+        .then(res => res.json()).then(data => { if (data.status === 'ok') location.reload(); });
+    }
+});
+
+function removeSkill(id, el) {
+    const formData = new FormData();
+    formData.append('skill_id', id);
+    formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+    fetch("{% url 'projects:remove_skill' pk=project.id %}", {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'ok') {
+            el.parentElement.remove();
+        }
+    });
+}
+
+function copyURL() {
+    navigator.clipboard.writeText(window.location.href);
+    alert("Ссылка скопирована!");
+}
+</script>
+{% endblock %}

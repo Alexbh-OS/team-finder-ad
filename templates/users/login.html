@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Вход{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<style>
+    .auth-card {
+        max-width: 400px;
+        margin: 80px auto;
+        padding: 40px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .auth-card h2 { margin-bottom: 30px; font-weight: 700; text-align: center; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+    .input-field { 
+        width: 100%; padding: 12px; border: 1px solid transparent; 
+        border-radius: 8px; background: #f5f5f9; box-sizing: border-box; 
+    }
+    button[type="submit"] {
+        width: 100%; padding: 12px; background: #000; color: #fff; 
+        border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+    }
+    .auth-link { text-align: center; margin-top: 20px; font-size: 14px; color: #666; }
+    .auth-link a { color: #000; font-weight: 700; text-decoration: none; }
+    .error-text { color: #ff4b4b; font-size: 13px; margin-bottom: 15px; text-align: center; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <h2>Вход в систему</h2>
+    <form method="post">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+            <div class="error-text">Неверный email или пароль</div>
+        {% endif %}
+
+        <div class="form-group">
+            <label>{{ form.username.label }}</label>
+            {{ form.username }}
+        </div>
+
+        <div class="form-group">
+            <label>{{ form.password.label }}</label>
+            {{ form.password }}
+        </div>
+
+        <button type="submit">Войти</button>
+    </form>
+    <p class="auth-link">Нет аккаунта? <a href="{% url 'users:register' %}">Зарегистрироваться</a></p>
+</div>
+{% endblock %}
