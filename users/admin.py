@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils.html import format_html
 
 from users.models import User
 
@@ -31,6 +32,12 @@ class UserAdmin(BaseUserAdmin):
         }),
     )
 
-
-
-
+    def avatar_preview(self, obj):
+        """Возвращает HTML-код для отображения миниатюры аватара"""
+        if obj.avatar:
+            return format_html(
+                '<img src="{}" width="50" height="50" style="border-radius: 50%; object-fit: cover;" />',
+                obj.avatar.url
+            )
+        return "Нет аватара"
+    avatar_preview.short_description = "Аватар"

@@ -10,12 +10,7 @@
 - Поиск проектов по навыкам
 - Добавление проектов в избранное
 
-## Технологии
 
-- Python 3.12
-- Django 5.x
-- PostgreSQL / SQLite
-- HTML, CSS, JavaScript
 
 ## Технологический стек
 
@@ -28,17 +23,53 @@
 
 ## Запуск проекта
 
-1. Клонировать репозиторий
-2. Создать виртуальное окружение: `python -m venv venv`
-3. Активировать окружение
-4. Установить зависимости: `pip install -r requirements.txt`
-5. Создать файл `.env` с настройками
-6. Выполнить миграции: `python manage.py migrate`
-7. Запустить сервер: `python manage.py runserver`
+### 1\. Подготовка окружения
 
+- git clone<url_репозитория>  Клонируйте репозиторий через HTTPS или SSH
+
+- python -m venv venv - Создайте виртуальное окружение 
+
+- source venv/bin/activate (для Linux/Mac) - Активируйте виртуальное окружение 
+
+  venv\\Scripts\\activate (для Windows)
+
+- pip install -r requirements.txt -  Установите необходимые зависимости:
+
+
+
+### 2\. Настройка переменных среды (.env)
+
+Создайте файл .env в корневой папке проекта и заполните его по примеру:
+
+DJANGO\_SECRET\_KEY=ваш\_секретный\_ключ
+
+DJANGO\_DEBUG = True
+
+ALLOWED\_HOSTS = 127.0.0.1,localhost
+
+POSTGRES\_DB = team\_finder
+POSTGRES\_USER = postgres
+
+POSTGRES\_PASSWORD = postgres
+POSTGRES\_HOST = localhost
+POSTGRES\_PORT = 5432
+
+
+### 3\. Запуск базы данных
+
+Проект использует PostgreSQL. Запустите её через Docker Compose:
+
+- docker compose up -d
+
+
+### 4\. Применение миграций и запуск
+
+Создайте структуру таблиц и запустите локальный сервер разработки:
+
+- python manage.py migrate - Создайте структуру таблиц
+- python manage.py runserver - Запустите локальный сервер разработки
 
 Проект будет доступен по адресу: http://localhost:8000
-
 
 
 ## Автор

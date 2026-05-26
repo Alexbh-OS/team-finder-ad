@@ -39,15 +39,6 @@ class UserProfileEditForm(GitHubValidationMixin, forms.ModelForm):
             "avatar",
             "skills",
         ]
-        labels = {
-            "name": "Имя",
-            "surname": "Фамилия",
-            "phone": "Телефон",
-            "github_url": "Ссылка на GitHub",
-            "about": "О себе",
-            "avatar": "Фото профиля",
-            "skills": "Ваши профессиональные навыки",
-        }
         widgets = {
             "name": forms.TextInput(attrs={"class": "input-field"}),
             "surname": forms.TextInput(attrs={"class": "input-field"}),
@@ -57,6 +48,3 @@ class UserProfileEditForm(GitHubValidationMixin, forms.ModelForm):
             "avatar": forms.FileInput(attrs={"class": "input-field"}),
             "skills": forms.CheckboxSelectMultiple(),
         }
-
-        
-

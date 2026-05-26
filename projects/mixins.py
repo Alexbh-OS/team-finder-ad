@@ -1,6 +1,10 @@
-from django import forms
-from projects.settings import GITHUB_URL_PREFIX
+"""Модуль с миксином для валидации GitHub URL."""
+
 import re
+
+from django import forms
+
+from projects.settings import GITHUB_URL_PREFIX
 
 
 class GitHubValidationMixin:

@@ -8,18 +8,19 @@ from django.views.decorators.http import require_POST
 from projects.settings import ProjectStatus, SKILL_AUTOCOMPLETE_LIMIT
 from projects.forms import ProjectForm
 from projects.models import Project, Skill
-from projects.utils import get_paginated_page
+from projects.utils import get_paginated_page,get_optimized_project_queryset
 
 
 def project_list(request):
     """Список проектов по навыку."""
     sel_skill = request.GET.get('skill')
 
-    projects_list = Project.objects.prefetch_related('skills', 'participants').order_by('-created_at')
+    projects_list = get_optimized_project_queryset().order_by('-created_at')
 
     if sel_skill:
         projects_list = projects_list.filter(skills__name=sel_skill).distinct()
 
+    total_count = projects_list.count()
     projects = get_paginated_page(request, projects_list)
     all_skills = Skill.objects.values_list('name', flat=True).distinct().order_by('name')
 
@@ -27,6 +28,7 @@ def project_list(request):
         'projects': projects,
         'all_skills': all_skills,
         'active_skill': sel_skill,
+        'total_count': total_count,
     }
     return render(request, 'projects/project_list.html', context)
 
@@ -69,7 +71,9 @@ def project_edit(request, pk):
 
 def project_detail(request, pk):
     """Страница проекта"""
-    project = get_object_or_404(Project.objects.prefetch_related('skills', 'participants'), pk=pk)
+    project = get_object_or_404(
+    get_optimized_project_queryset(),
+    pk=pk)
 
     context = {'project': project,
                 'skills': project.skills.all(),
@@ -151,4 +155,3 @@ def remove_skill_from_project(request, pk):
 
 def redirect_to_projects(request):
     return redirect('projects:list')
-

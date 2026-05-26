@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
@@ -8,6 +9,9 @@ from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from users.forms import UserProfileEditForm, UserRegistrationForm, UserLoginForm
 from users.models import User
 
+from users.settings import (
+    PAGINATION_SIZE
+)
 
 class UserRegisterView(CreateView):
     """Регистрация нового пользователя"""
@@ -38,7 +42,7 @@ class ParticipantsListView(ListView):
     model = User
     template_name = 'users/participants.html'
     context_object_name = 'participants'
-    paginate_by = 20
+    paginate_by = PAGINATION_SIZE
 
     def get_queryset(self):
         queryset = (
@@ -92,7 +96,6 @@ class UserDetailView(DetailView):
     model = User
     template_name = 'users/user-details.html'
     context_object_name = 'profile'
-    pk_url_kwarg = 'pk'
 
     def get_queryset(self):
         return User.objects.prefetch_related('owned_projects', 'skills')
@@ -115,7 +118,7 @@ class UserProfileEditView(LoginRequiredMixin, UpdateView):
         return self.request.user
 
     def get_success_url(self):
-        return reverse_lazy(
+        return reverse(
             'users:profile_with_pk',
             kwargs={'pk': self.request.user.pk}
         )

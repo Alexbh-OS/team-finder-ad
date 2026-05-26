@@ -11,7 +11,10 @@ from users.settings import (
     MAX_PHONE_LENGTH,
     MAX_USNAME_LENGTH,
     AVATAR_IMAGE_SIZE,
-    DEFAULT_AVATAR_COLOR
+    DEFAULT_AVATAR_COLOR,
+    AVATAR_TEXT_COLOR,
+    AVATAR_TEXT_POSITION,
+    AVATAR_FONT_SIZE,
 )
 from users.managers import UserManager
 
@@ -90,27 +93,37 @@ class User(AbstractBaseUser, PermissionsMixin):
         super().save(*args, **kwargs)
 
     def create_avatar(self):
+        """Генерирует аватар с инициалами пользователя"""
         low, high = DEFAULT_AVATAR_COLOR
         color = (
             random.randint(low, high),
             random.randint(low, high),
             random.randint(low, high)
         )
-        img = Image.new("RGB", AVATAR_IMAGE_SIZE, color=color)
+        img = Image.new('RGB', AVATAR_IMAGE_SIZE, color=color)
         draw = ImageDraw.Draw(img)
-        letter = self.name[0].upper() if self.name else "U"
 
         draw.rectangle((0, 0, 199, 199), outline=(0, 0, 0), width=2)
 
-        try:
-            font = ImageFont.load_default()
-        except IOError:
-            font = None
+        letter = self.name[0].upper() if self.name else 'U'
 
-        draw.text((75, 75), letter, fill=(255, 255, 255), font=font)
+        try:
+            font = ImageFont.truetype('arial.ttf', AVATAR_FONT_SIZE)
+        except (IOError, OSError):
+            try:
+                font = ImageFont.load_default()
+                font = font.font_variant(size=AVATAR_FONT_SIZE)
+            except AttributeError:
+                font = ImageFont.load_default()
+
+        draw.text(
+            AVATAR_TEXT_POSITION,
+            letter,
+            fill=AVATAR_TEXT_COLOR,
+            font=font
+        )
 
         buffer = BytesIO()
-        img.save(buffer, format="PNG")
-        filename = f"{self.email.split('@')[0]}_avatar.png"
+        img.save(buffer, format='PNG')
+        filename = f'{self.email.split("@")[0]}_avatar.png'
         self.avatar.save(filename, ContentFile(buffer.getvalue()), save=False)
-
